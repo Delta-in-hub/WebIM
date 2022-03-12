@@ -8,5 +8,8 @@ urlpatterns = [
     path("register/", register),
     path("api/register/", user_register),
 
-    path("assistant/", assistant),
+    path("assistant/<str:content>", assistant),
+
+    # url(r'element/update/(?P<pk>\d+)/$', 'element.views.element_update', name='element_update'),
+
 ]

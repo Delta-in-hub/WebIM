@@ -19,7 +19,7 @@
       }
     }
 
-    if ($(input[arr[0]]).val() != $(input[arr[1]]).val()) {
+    if (arr.length >= 2 && $(input[arr[0]]).val() != $(input[arr[1]]).val()) {
       showValidate(input[arr[1]]);
       showValidate(input[arr[0]]);
       check = false;
