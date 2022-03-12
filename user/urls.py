@@ -10,6 +10,4 @@ urlpatterns = [
 
     path("assistant/<str:content>", assistant),
 
-    # url(r'element/update/(?P<pk>\d+)/$', 'element.views.element_update', name='element_update'),
-
 ]
