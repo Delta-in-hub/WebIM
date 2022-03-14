@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.contrib.auth import login as auth_login
 from sympy import content
 # Create your views here.
 # 用户登陆界面
@@ -16,10 +17,9 @@ def login(request: HttpRequest):
     if emailRegister and passRegister:
         user = authenticate(username=emailRegister, password=passRegister)
         if user is not None:
-            login(request, user)
+            auth_login(request, user)
             # A backend authenticated the credentials
-            return HttpResponse('登陆成功')
-            pass
+            return redirect("/")
         else:
             return redirect("/user/assistant/" + "帐户名或者密码错误")
     return render(request, 'login.html')
