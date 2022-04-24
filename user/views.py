@@ -15,7 +15,8 @@ def login(request: HttpRequest):
     passRegister = request.GET.get('pass')
 
     if emailRegister and passRegister:
-        user = authenticate(username=emailRegister, password=passRegister)
+        user = authenticate(username=emailRegister.lower(),
+                            password=passRegister)
         if user is not None:
             auth_login(request, user)
             # A backend authenticated the credentials
@@ -32,6 +33,7 @@ def register(request: HttpRequest):
     passRegister = request.GET.get('pass')
     pass2Register = request.GET.get('pass2')
     if emailRegister and passRegister and pass2Register:
+        emailRegister = emailRegister.lower()
         if passRegister == pass2Register:
             if len(passRegister) < 5:
                 return redirect("/user/assistant/" + "密码过短或强度过低")
