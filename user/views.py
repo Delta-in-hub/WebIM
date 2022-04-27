@@ -11,11 +11,11 @@ from sympy import content
 
 
 def login(request: HttpRequest):
-    emailRegister = request.GET.get('email')
+    userRegister = request.GET.get('email')
     passRegister = request.GET.get('pass')
 
-    if emailRegister and passRegister:
-        user = authenticate(username=emailRegister.lower(),
+    if userRegister and passRegister:
+        user = authenticate(username=userRegister.lower(),
                             password=passRegister)
         if user is not None:
             auth_login(request, user)
@@ -29,20 +29,23 @@ def login(request: HttpRequest):
 # 用户注册界面
 def register(request: HttpRequest):
 
-    emailRegister = request.GET.get('email')
+    userRegister = request.GET.get('email')
     passRegister = request.GET.get('pass')
     pass2Register = request.GET.get('pass2')
-    if emailRegister and passRegister and pass2Register:
-        emailRegister = emailRegister.lower()
+    if userRegister and passRegister and pass2Register:
+        userRegister = userRegister.lower()
+        if len(userRegister) < 2:
+            return redirect("/user/assistant/" + "帐户名太短,请输入至少2个字符")
+
         if passRegister == pass2Register:
             if len(passRegister) < 5:
-                return redirect("/user/assistant/" + "密码过短或强度过低")
+                return redirect("/user/assistant/" + "密码过短或强度过低,请输入至少5个字符")
 
-            if User.objects.filter(username=emailRegister).exists():
+            if User.objects.filter(username=userRegister).exists():
                 return redirect("/user/assistant/" + "帐户已存在")
 
             user = User.objects.create_user(
-                emailRegister, emailRegister, passRegister)
+                userRegister, userRegister, passRegister)
             user.save()
             return redirect("/user/assistant/" + "注册成功")
 
