@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')),
     path('webim/', include('mainpage.urls')),
+    path('apis/', include('apis.urls')),
     path("", include('mainpage.urls')),
 ]

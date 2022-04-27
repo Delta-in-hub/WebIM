@@ -36,6 +36,8 @@ def register(request: HttpRequest):
         userRegister = userRegister.lower()
         if len(userRegister) < 2:
             return redirect("/user/assistant/" + "帐户名太短,请输入至少2个字符")
+        if len(userRegister) > 30:
+            return redirect("/user/assistant/" + "帐户名太长,请输入最多30个字符")
 
         if passRegister == pass2Register:
             if len(passRegister) < 5:
@@ -57,11 +59,3 @@ def register(request: HttpRequest):
 
 def assistant(request: HttpRequest, content):
     return render(request, 'assistant.html', {"content": content})
-
-
-def user_register(request: HttpRequest):
-    return render(request, 'user_register.html')
-
-
-def user_login(request: HttpRequest):
-    return render(request, 'user_login.html')
