@@ -15,7 +15,7 @@
     />
     <link rel="stylesheet" href="{% static 'css/webim.css' %}" />
   </head>
-  <body>
+  <body onload="getFriendsList()">
     <!-- partial:index.partial.html -->
     <div class="app">
       <div class="header">
@@ -144,7 +144,7 @@
         <div class="chat-area">
           <div class="chat-area-header">
             <div class="chat-area-title">CodePen Group</div>
-            <div class="chat-area-group">
+            <!-- <div class="chat-area-group">
               <img
                 class="chat-area-profile"
                 src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%283%29+%281%29.png"
@@ -161,7 +161,7 @@
                 alt=""
               />
               <span>+4</span>
-            </div>
+            </div> -->
           </div>
           <div class="chat-area-main">
             <div class="chat-msg">

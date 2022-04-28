@@ -41,6 +41,162 @@ function addFriendButton() {
   addFriend(friendName);
 }
 
+function getMessagesSendByMe(friendName) {
+  // getMessagesSendByMe?friendName=bob
+  var url = "/apis/getMessagesSendByMe?friendName=";
+  if (friendName == null || friendName == "") {
+    return [];
+  }
+  url += friendName;
+  var http = new XMLHttpRequest();
+  http.open("GET", url, false);
+  http.send(null);
+  if (http.readyState == 4 && http.status == 200) {
+    var re_json = JSON.parse(http.responseText);
+    return re_json["messages"];
+  }
+  return [];
+}
+
+function getMessagesSendByFriend(friendName) {
+  // http://127.0.0.1:8000/apis/getMessagesSendByFriend?friendName=delta
+  var url = "/apis/getMessagesSendByFriend?friendName=";
+  if (friendName == null || friendName == "") {
+    return [];
+  }
+  url += friendName;
+  var http = new XMLHttpRequest();
+  http.open("GET", url, false);
+  http.send(null);
+  if (http.readyState == 4 && http.status == 200) {
+    var re_json = JSON.parse(http.responseText);
+    return re_json["messages"];
+  }
+  return [];
+}
+
+function formatDate(str) {
+  // 2022-04-28T08:17:14.329Z
+  str.indexOf(".");
+  var dateStr = str.substring(0, str.indexOf("."));
+  var date = new Date(dateStr + "Z");
+  return date;
+}
+
+function getOrderedMessageList(friendName) {
+  var messagesSendByMe = getMessagesSendByMe(friendName);
+  messagesSendByMe.forEach((message) => {
+    message["time"] = formatDate(message["time"]);
+    message["isSendByMe"] = true;
+  });
+
+  var messagesSendByFriend = getMessagesSendByFriend(friendName);
+  messagesSendByFriend.forEach((message) => {
+    message["time"] = formatDate(message["time"]);
+    message["isSendByMe"] = false;
+  });
+
+  var messages = messagesSendByMe.concat(messagesSendByFriend);
+  messages.sort(function (a, b) {
+    return a["time"] < b["time"];
+  });
+  return messages;
+}
+
+function changeChatArea(afriend) {
+  console.log("changeChatArea: " + afriend.innerHTML);
+  var old_active = document.getElementsByClassName("msg active")[0];
+  if (old_active != null) {
+    old_active.className = "msg";
+  }
+  afriend.className = "msg active";
+
+  var chatTitle = document.getElementsByClassName("chat-area-title")[0];
+  chatTitle.innerHTML =
+    afriend.getElementsByClassName("msg-username")[0].innerHTML;
+
+  var chatAreaMain = document.getElementsByClassName("chat-area-main")[0]; // chat-area-main
+  chatAreaMain.innerHTML = "";
+  messageList = getOrderedMessageList(
+    afriend.getElementsByClassName("msg-username")[0].innerHTML
+  );
+  var pre_chat = null;
+  for (let index = 0; index < messageList.length; ) {
+    const message = messageList[index];
+    if (pre_chat == null) {
+      pre_chat = document.createElement("div");
+      if (message["isSendByMe"]) {
+        pre_chat.className = "chat-msg owner";
+      } else {
+        pre_chat.className = "chat-msg";
+      }
+      var chat_msg_profile = document.createElement("div");
+      chat_msg_profile.className = "chat-msg-profile";
+      var chat_msg_profile_img = document.createElement("img");
+      chat_msg_profile_img.className = "chat-msg-img";
+      chat_msg_profile_img.src =
+        "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%281%29.png";
+      chat_msg_profile.appendChild(chat_msg_profile_img);
+      var chat_msg_date = document.createElement("div");
+      chat_msg_date.className = "chat-msg-date";
+      chat_msg_date.innerHTML = "seen " + message["time"].toLocaleTimeString();
+      chat_msg_profile.appendChild(chat_msg_date);
+      pre_chat.appendChild(chat_msg_profile);
+
+      var chat_msg_content = document.createElement("div");
+      chat_msg_content.className = "chat-msg-content";
+      pre_chat.appendChild(chat_msg_content);
+    }
+    if (message["isSendByMe"] && pre_chat.className == "chat-msg") {
+      chatAreaMain.appendChild(pre_chat);
+      pre_chat = null;
+      continue;
+    } else if (
+      !message["isSendByMe"] &&
+      pre_chat.className == "chat-msg owner"
+    ) {
+      chatAreaMain.appendChild(pre_chat);
+      pre_chat = null;
+      continue;
+    }
+
+    var chat_msg_text = document.createElement("div");
+    chat_msg_text.className = "chat-msg-text";
+    chat_msg_text.innerHTML = message["content"];
+
+    pre_chat
+      .getElementsByClassName("chat-msg-content")[0]
+      .appendChild(chat_msg_text);
+
+    index++;
+  }
+  if (pre_chat != null) {
+    chatAreaMain.appendChild(pre_chat);
+  }
+
+  /*
+            <div class="chat-msg owner">
+              <div class="chat-msg-profile">
+                <img
+                  class="chat-msg-img"
+                  src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%281%29.png"
+                  alt=""
+                />
+                <div class="chat-msg-date">Message seen 2.50pm</div>
+              </div>
+              <div class="chat-msg-content">
+                <div class="chat-msg-text">
+                  posuere eget augue sodales, aliquet posuere eros.
+                </div>
+                <div class="chat-msg-text">
+                  Cras mollis nec arcu malesuada tincidunt.
+                </div>
+              </div>
+            </div>
+
+ */
+}
+
 function updateFriendList(friendsList) {
   if (friendsList == null || friendsList.length == 0) {
     return;
@@ -48,6 +204,10 @@ function updateFriendList(friendsList) {
   friendsList.forEach((name) => {
     var afriend = document.createElement("div");
     afriend.className = "msg";
+
+    afriend.addEventListener("click", function handleClick() {
+      changeChatArea(this);
+    });
 
     var img = document.createElement("img");
     img.className = "msg-profile";
