@@ -5,7 +5,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import login as auth_login
-from sympy import content
 # Create your views here.
 # 用户登陆界面
 
