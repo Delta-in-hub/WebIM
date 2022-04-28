@@ -35,6 +35,7 @@ function addFriendButton() {
     return;
   }
   addFriend(friendName);
+  getFriendsList();
 }
 
 function getMessagesSendByMe(friendName) {
@@ -115,10 +116,18 @@ function changeChatArea(afriend) {
     afriend.getElementsByClassName("msg-username")[0].innerHTML;
 
   var chatAreaMain = document.getElementsByClassName("chat-area-main")[0]; // chat-area-main
-  chatAreaMain.innerHTML = "";
+
   messageList = getOrderedMessageList(
     afriend.getElementsByClassName("msg-username")[0].innerHTML
   );
+  if (
+    messageList.length ==
+    chatAreaMain.getElementsByClassName("chat-msg-text").length
+  ) {
+    return;
+  }
+
+  chatAreaMain.innerHTML = "";
   var pre_chat = null;
   for (let index = 0; index < messageList.length; ) {
     const message = messageList[index];
@@ -174,6 +183,7 @@ function changeChatArea(afriend) {
     chatAreaMain.appendChild(pre_chat);
   }
 
+  scrollDown();
   /*
             <div class="chat-msg owner">
               <div class="chat-msg-profile">
@@ -218,6 +228,7 @@ function updateFriendList(friendsList) {
       afriend.className = "msg";
 
       afriend.addEventListener("click", function handleClick() {
+        getFriendsList();
         changeChatArea(this);
       });
 
@@ -301,7 +312,7 @@ function sleep(time) {
 
 function fullUpdate() {
   console.log("fullUpdate" + new Date());
-  getFriendsList();
+  // getFriendsList();
   changeChatArea(document.getElementsByClassName("msg active")[0]);
 }
 
@@ -327,8 +338,8 @@ function sendMessage() {
   input.value = "";
   sleep(10).then(() => {
     fullUpdate();
+    scrollDown();
   });
-  scrollDown();
 }
 
 var input = document.getElementById("message_input");
@@ -336,9 +347,11 @@ input.addEventListener("keypress", function (event) {
   if (event.key === "Enter") {
     event.preventDefault();
     sendMessage();
+    scrollDown();
   }
 });
-// setInterval(fullUpdate, 1500);
+
+setInterval(fullUpdate, 1500);
 
 function scrollDown() {
   const tmp = document.getElementsByClassName("chat-area")[0];
