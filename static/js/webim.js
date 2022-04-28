@@ -10,10 +10,6 @@ colors.forEach((color) => {
   });
 });
 
-toggleButton.addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-});
-
 function addFriend(friendName) {
   var url = "/apis/addFriend?friendName=";
   if (friendName == null || friendName == "") {
@@ -98,13 +94,16 @@ function getOrderedMessageList(friendName) {
 
   var messages = messagesSendByMe.concat(messagesSendByFriend);
   messages.sort(function (a, b) {
-    return a["time"] < b["time"];
+    return a["time"].getTime() - b["time"].getTime();
   });
   return messages;
 }
 
 function changeChatArea(afriend) {
-  console.log("changeChatArea: " + afriend.innerHTML);
+  // console.log("changeChatArea: " + afriend.innerHTML);
+  if (afriend == null) {
+    return;
+  }
   var old_active = document.getElementsByClassName("msg active")[0];
   if (old_active != null) {
     old_active.className = "msg";
@@ -139,7 +138,8 @@ function changeChatArea(afriend) {
       chat_msg_profile.appendChild(chat_msg_profile_img);
       var chat_msg_date = document.createElement("div");
       chat_msg_date.className = "chat-msg-date";
-      chat_msg_date.innerHTML = "seen " + message["time"].toLocaleTimeString();
+      chat_msg_date.innerHTML =
+        "send at " + message["time"].toLocaleTimeString();
       chat_msg_profile.appendChild(chat_msg_date);
       pre_chat.appendChild(chat_msg_profile);
 
@@ -197,54 +197,67 @@ function changeChatArea(afriend) {
  */
 }
 
+function isFriendInList(friendName) {
+  var friendList = document.getElementsByClassName("msg-username");
+  for (let index = 0; index < friendList.length; index++) {
+    const friend = friendList[index];
+    if (friend.innerHTML == friendName) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function updateFriendList(friendsList) {
   if (friendsList == null || friendsList.length == 0) {
     return;
   }
   friendsList.forEach((name) => {
-    var afriend = document.createElement("div");
-    afriend.className = "msg";
+    if (!isFriendInList(name)) {
+      var afriend = document.createElement("div");
+      afriend.className = "msg";
 
-    afriend.addEventListener("click", function handleClick() {
-      changeChatArea(this);
-    });
+      afriend.addEventListener("click", function handleClick() {
+        changeChatArea(this);
+      });
 
-    var img = document.createElement("img");
-    img.className = "msg-profile";
-    img.src =
-      "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%284%29+%281%29.png";
-    afriend.appendChild(img);
+      var img = document.createElement("img");
+      img.className = "msg-profile";
+      img.src =
+        "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%284%29+%281%29.png";
+      afriend.appendChild(img);
 
-    var msg_detail = document.createElement("div");
-    msg_detail.className = "msg-detail";
+      var msg_detail = document.createElement("div");
+      msg_detail.className = "msg-detail";
 
-    var msg_username = document.createElement("div");
-    msg_username.className = "msg-username";
-    msg_username.innerHTML = name;
+      var msg_username = document.createElement("div");
+      msg_username.className = "msg-username";
+      msg_username.innerHTML = name;
 
-    msg_detail.appendChild(msg_username);
+      msg_detail.appendChild(msg_username);
 
-    var msg_content = document.createElement("div");
-    msg_content.className = "msg-content";
+      var msg_content = document.createElement("div");
+      msg_content.className = "msg-content";
 
-    var msg_message = document.createElement("span");
-    msg_message.className = "msg-message";
-    msg_message.innerHTML = "你好，我是" + name;
+      var msg_message = document.createElement("span");
+      msg_message.className = "msg-message";
+      msg_message.innerHTML = "你好，我是" + name;
 
-    msg_content.appendChild(msg_message);
+      msg_content.appendChild(msg_message);
 
-    var msg_time = document.createElement("span");
-    msg_time.className = "msg-date";
-    msg_time.innerHTML = "18m";
+      var msg_time = document.createElement("span");
+      msg_time.className = "msg-date";
+      msg_time.innerHTML = "18m";
 
-    msg_content.appendChild(msg_time);
+      msg_content.appendChild(msg_time);
 
-    msg_detail.appendChild(msg_content);
+      msg_detail.appendChild(msg_content);
 
-    afriend.appendChild(msg_detail);
+      afriend.appendChild(msg_detail);
 
-    var area = document.getElementsByClassName("conversation-area")[0];
-    area.prepend(afriend);
+      var area = document.getElementsByClassName("conversation-area")[0];
+      area.prepend(afriend);
+    }
   });
 
   /*
@@ -280,4 +293,54 @@ function getFriendsList() {
     }
   };
   http.send(null);
+}
+
+function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function fullUpdate() {
+  console.log("fullUpdate" + new Date());
+  getFriendsList();
+  changeChatArea(document.getElementsByClassName("msg active")[0]);
+}
+
+function sendMessage() {
+  const input = document.getElementById("message_input");
+  if (input.value == "") {
+    fullUpdate();
+    scrollDown();
+    return;
+  }
+  var friendName =
+    document.getElementsByClassName("chat-area-title")[0].innerHTML;
+  var url =
+    "/apis/sendMessage?content=" + input.value + "&friendName=" + friendName;
+  var http = new XMLHttpRequest();
+  http.open("GET", url, true);
+  http.onreadystatechange = function () {
+    if (http.readyState == 4 && http.status == 200) {
+      console.log("sendMessage: " + http.responseText);
+    }
+  };
+  http.send(null);
+  input.value = "";
+  sleep(10).then(() => {
+    fullUpdate();
+  });
+  scrollDown();
+}
+
+var input = document.getElementById("message_input");
+input.addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendMessage();
+  }
+});
+// setInterval(fullUpdate, 1500);
+
+function scrollDown() {
+  const tmp = document.getElementsByClassName("chat-area")[0];
+  tmp.scrollTop = tmp.scrollHeight;
 }

@@ -8,5 +8,4 @@ urlpatterns = [
     path("sendMessage", sendMessage),
     path("addFriend", addFriend),
     path("removeFriend", removeFriend),
-
 ]
