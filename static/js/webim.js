@@ -100,6 +100,20 @@ function getOrderedMessageList(friendName) {
   return messages;
 }
 
+var my_name = null;
+
+function getMyName() {
+  if (my_name == null) {
+    var http = new XMLHttpRequest();
+    http.open("GET", "/apis/getUserInfo", false);
+    http.send(null);
+    if (http.readyState == 4 && http.status == 200) {
+      my_name = new String(JSON.parse(http.responseText)["userName"]);
+    }
+  }
+  return my_name;
+}
+
 function changeChatArea(afriend) {
   // console.log("changeChatArea: " + afriend.innerHTML);
   if (afriend == null) {
@@ -142,8 +156,15 @@ function changeChatArea(afriend) {
       chat_msg_profile.className = "chat-msg-profile";
       var chat_msg_profile_img = document.createElement("img");
       chat_msg_profile_img.className = "chat-msg-img";
-      chat_msg_profile_img.src =
-        "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%281%29.png";
+      var name =
+        document.getElementsByClassName("chat-area-title")[0].innerHTML;
+
+      if (message["isSendByMe"]) {
+        name = getMyName();
+      }
+
+      chat_msg_profile_img.src = getAvatar(name);
+
       chat_msg_profile.appendChild(chat_msg_profile_img);
       var chat_msg_date = document.createElement("div");
       chat_msg_date.className = "chat-msg-date";
@@ -218,6 +239,16 @@ function isFriendInList(friendName) {
   return false;
 }
 
+const hashCode = (s) =>
+  s.split("").reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
+
+function getAvatar(friendName) {
+  var hash = hashCode(friendName);
+  var avatar = hash % 22; //1-22
+  avatar = avatar + 1;
+  return "/static/emoji/emoji" + avatar + ".png";
+}
+
 function updateFriendList(friendsList) {
   if (friendsList == null || friendsList.length == 0) {
     return;
@@ -234,8 +265,8 @@ function updateFriendList(friendsList) {
 
       var img = document.createElement("img");
       img.className = "msg-profile";
-      img.src =
-        "https://s3-us-west-2.amazonaws.com/s.cdpn.io/3364143/download+%284%29+%281%29.png";
+      img.src = getAvatar(name);
+
       afriend.appendChild(img);
 
       var msg_detail = document.createElement("div");

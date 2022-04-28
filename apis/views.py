@@ -101,3 +101,9 @@ def removeFriend(request):
     Friends.objects.filter(userName=friendName.lower(),
                            friendName=userName).delete()
     return JsonResponse({'status': 'success'})
+
+
+@login_required(login_url='/user/login/')
+def getUserInfo(request):
+    userName = request.user.username
+    return JsonResponse({'userName': userName})
