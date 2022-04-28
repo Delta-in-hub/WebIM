@@ -249,6 +249,17 @@ function getAvatar(friendName) {
   return "/static/emoji/emoji" + avatar + ".png";
 }
 
+function getLastMessage(friendNmae) {
+  var messageList = getMessagesSendByFriend(friendNmae);
+  if (messageList.length == 0) {
+    return ["", ""];
+  }
+  return [
+    messageList[messageList.length - 1]["content"].substring(0, 15),
+    messageList[messageList.length - 1]["time"],
+  ];
+}
+
 function updateFriendList(friendsList) {
   if (friendsList == null || friendsList.length == 0) {
     return;
@@ -283,13 +294,23 @@ function updateFriendList(friendsList) {
 
       var msg_message = document.createElement("span");
       msg_message.className = "msg-message";
-      msg_message.innerHTML = "你好，我是" + name;
+
+      var last_message = getLastMessage(name);
+      if (last_message[0] == "") {
+        msg_message.innerHTML = "Hello, I'm " + name;
+      } else {
+        msg_message.innerHTML = last_message[0];
+      }
 
       msg_content.appendChild(msg_message);
 
       var msg_time = document.createElement("span");
       msg_time.className = "msg-date";
-      msg_time.innerHTML = "18m";
+      if (last_message[1] != "") {
+        msg_time.innerHTML = formatDate(last_message[1]).toLocaleTimeString();
+      } else {
+        msg_time.innerHTML = (new Date()).toLocaleTimeString();
+      }
 
       msg_content.appendChild(msg_time);
 
