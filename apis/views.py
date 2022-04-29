@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpRequest
 from django.http import JsonResponse
 from .models import *
+from django.template.context_processors import csrf
 
 
 def getUserFriends(user):
@@ -55,10 +56,18 @@ def getMessagesSendByFriend(request):
 
 
 @login_required(login_url='/user/login/')
+def getCsrfToken(request):
+    return JsonResponse({'csrfToken': str(csrf(request)['csrf_token'])})
+
+
+@login_required(login_url='/user/login/')
 def sendMessage(request):
+    if(request.method != 'POST'):
+        return JsonResponse({'status': 'error', "message": "method not allowed"})
     userName = request.user.username
-    friendName = request.GET.get('friendName')
-    content = request.GET.get('content')
+    friendName = request.POST.get('friendName')
+    content = request.POST.get('content')
+    # print(userName, friendName, content)
     if not content or not friendName or not isFriend(userName, friendName):
         return JsonResponse({'status': 'error'})
 

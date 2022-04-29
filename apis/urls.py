@@ -9,4 +9,5 @@ urlpatterns = [
     path("addFriend", addFriend),
     path("removeFriend", removeFriend),
     path("getUserInfo", getUserInfo),
+    path("getCsrfToken", getCsrfToken),
 ]

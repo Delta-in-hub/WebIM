@@ -114,6 +114,11 @@ function getMyName() {
   return my_name;
 }
 
+function isBase64Image(str) {
+  var base64regex = new RegExp("^data:image/[a-zA-Z]+;base64,.+$", "g");
+  return base64regex.test(str);
+}
+
 function changeChatArea(afriend) {
   // console.log("changeChatArea: " + afriend.innerHTML);
   if (afriend == null) {
@@ -192,8 +197,15 @@ function changeChatArea(afriend) {
 
     var chat_msg_text = document.createElement("div");
     chat_msg_text.className = "chat-msg-text";
-    chat_msg_text.innerHTML = message["content"];
 
+    var content = message["content"];
+    if (isBase64Image(content)) {
+      var img = document.createElement("img");
+      img.src = content;
+      chat_msg_text.appendChild(img);
+    } else {
+      chat_msg_text.innerHTML = message["content"];
+    }
     pre_chat
       .getElementsByClassName("chat-msg-content")[0]
       .appendChild(chat_msg_text);
@@ -320,6 +332,29 @@ function updateFriendList(friendsList) {
 
       var area = document.getElementsByClassName("conversation-area")[0];
       area.prepend(afriend);
+    } else {
+      var area = document.getElementsByClassName("conversation-area");
+      Array.from(area).forEach((element) => {
+        var friend = element.getElementsByClassName("msg-username");
+        for (let index = 0; index < friend.length; index++) {
+          const element = friend[index];
+          if (element.innerHTML == name) {
+            var last_message = getLastMessage(name);
+            if (last_message[0] == "") {
+              element.parentElement.getElementsByClassName(
+                "msg-message"
+              )[0].innerHTML = "Hello, I'm " + name;
+            } else {
+              element.parentElement.getElementsByClassName(
+                "msg-message"
+              )[0].innerHTML = last_message[0];
+            }
+            element.parentElement.getElementsByClassName(
+              "msg-date"
+            )[0].innerHTML = formatDate(last_message[1]).toLocaleTimeString();
+          }
+        }
+      });
     }
   });
 
@@ -377,21 +412,24 @@ function sendMessage() {
   }
   var friendName =
     document.getElementsByClassName("chat-area-title")[0].innerHTML;
-  var url =
-    "/apis/sendMessage?content=" + input.value + "&friendName=" + friendName;
+  var url = "/apis/sendMessage";
   var http = new XMLHttpRequest();
-  http.open("GET", url, true);
+  http.open("POST", url, true);
+  http.setRequestHeader("X-CSRFToken", getCsrfToken());
   http.onreadystatechange = function () {
     if (http.readyState == 4 && http.status == 200) {
       console.log("sendMessage: " + http.responseText);
+      input.value = "";
+      sleep(10).then(() => {
+        fullUpdate();
+        scrollDown();
+      });
     }
   };
-  http.send(null);
-  input.value = "";
-  sleep(10).then(() => {
-    fullUpdate();
-    scrollDown();
-  });
+  var data = new FormData();
+  data.append("content", input.value);
+  data.append("friendName", friendName);
+  http.send(data);
 }
 
 var input = document.getElementById("message_input");
@@ -404,6 +442,7 @@ input.addEventListener("keypress", function (event) {
 });
 
 setInterval(fullUpdate, 2000);
+setInterval(getFriendsList, 10000);
 
 function scrollDown() {
   const tmp = document.getElementsByClassName("chat-area")[0];
@@ -411,3 +450,54 @@ function scrollDown() {
 }
 
 document.getElementsByClassName("user-profile")[0].src = getAvatar(getMyName());
+
+$("#upload-image").click(function () {
+  $("#image-choose").click();
+});
+
+$("#image-choose").change(function () {
+  const selectedFile = document.getElementById("image-choose").files[0];
+  console.log("image from file : " + selectedFile.name);
+  if (selectedFile == null || !selectedFile.type.match("image.*")) {
+    console.log("not image");
+    return;
+  }
+  var fileReader = new FileReader();
+  fileReader.onloadend = function (fileLoadedEvent) {
+    var srcData = fileLoadedEvent.target.result; // <--- data: base64
+    var newImage = document.createElement("img");
+    newImage.src = srcData;
+    // console.log("Converted Base64 version is " + newImage.src);
+
+    var friendName =
+      document.getElementsByClassName("chat-area-title")[0].innerHTML;
+    var url = "/apis/sendMessage";
+    var http = new XMLHttpRequest();
+    http.open("POST", url, true);
+    http.setRequestHeader("X-CSRFToken", getCsrfToken());
+    http.onreadystatechange = function () {
+      if (http.readyState == 4 && http.status == 200) {
+        console.log("send Image: " + http.responseText);
+        sleep(10).then(() => {
+          fullUpdate();
+          scrollDown();
+        });
+      }
+    };
+    var data = new FormData();
+    data.append("content", srcData);
+    data.append("friendName", friendName);
+    http.send(data);
+  };
+  fileReader.readAsDataURL(selectedFile);
+});
+
+function getCsrfToken() {
+  var cookies = document.cookie.split(";");
+  for (var i = 0; i < cookies.length; i++) {
+    if (cookies[i].startsWith("csrftoken=")) {
+      return cookies[i].substring("csrftoken=".length, cookies[i].length);
+    }
+  }
+  return "unknown";
+}

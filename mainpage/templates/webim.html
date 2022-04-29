@@ -14,6 +14,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css"
     />
     <link rel="stylesheet" href="{% static 'css/webim.css' %}" />
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
   </head>
   <body onload="getFriendsList()">
     <!-- partial:index.partial.html -->
@@ -304,6 +305,12 @@
               <path d="M23 7l-7 5 7 5V7z" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
+            <input
+              type="file"
+              id="image-choose"
+              style="display: none"
+              accept="image/*"
+            />
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -313,6 +320,7 @@
               stroke-linecap="round"
               stroke-linejoin="round"
               class="feather feather-image"
+              id="upload-image"
             >
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
@@ -322,7 +330,7 @@
             <input
               type="text"
               id="message_input"
-              placeholder="Type something here..."
+              placeholder="Type Something here ..."
             />
 
             <svg
