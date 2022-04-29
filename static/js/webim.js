@@ -457,11 +457,15 @@ $("#upload-image").click(function () {
 
 $("#image-choose").change(function () {
   const selectedFile = document.getElementById("image-choose").files[0];
-  console.log("image from file : " + selectedFile.name);
-  if (selectedFile == null || !selectedFile.type.match("image.*")) {
-    console.log("not image");
+  if (selectedFile == null) {
+    console.log("no file selected");
     return;
   }
+  if (!selectedFile.type.match("image.*") || selectedFile.size > 524288) {
+    console.log(selectedFile.type + " " + selectedFile.size);
+    return;
+  }
+  console.log("image from file : " + selectedFile.name);
   var fileReader = new FileReader();
   fileReader.onloadend = function (fileLoadedEvent) {
     var srcData = fileLoadedEvent.target.result; // <--- data: base64
