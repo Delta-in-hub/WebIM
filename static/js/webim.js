@@ -533,3 +533,5 @@ function getCsrfToken() {
   }
   return "unknown";
 }
+
+document.getElementById("my-name").innerHTML = getMyName();
