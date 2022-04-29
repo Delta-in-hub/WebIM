@@ -463,6 +463,7 @@ $("#image-choose").change(function () {
   }
   if (!selectedFile.type.match("image.*") || selectedFile.size > 524288) {
     console.log(selectedFile.type + " " + selectedFile.size);
+    alert("Invalid file type or file size");
     return;
   }
   console.log("image from file : " + selectedFile.name);
