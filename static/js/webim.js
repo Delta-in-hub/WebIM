@@ -309,7 +309,7 @@ function updateFriendList(friendsList) {
       if (last_message[1] != "") {
         msg_time.innerHTML = formatDate(last_message[1]).toLocaleTimeString();
       } else {
-        msg_time.innerHTML = (new Date()).toLocaleTimeString();
+        msg_time.innerHTML = new Date().toLocaleTimeString();
       }
 
       msg_content.appendChild(msg_time);
@@ -403,9 +403,11 @@ input.addEventListener("keypress", function (event) {
   }
 });
 
-setInterval(fullUpdate, 1500);
+setInterval(fullUpdate, 2000);
 
 function scrollDown() {
   const tmp = document.getElementsByClassName("chat-area")[0];
   tmp.scrollTop = tmp.scrollHeight;
 }
+
+document.getElementsByClassName("user-profile")[0].src = getAvatar(getMyName());
