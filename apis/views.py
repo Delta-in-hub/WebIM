@@ -1,9 +1,5 @@
-from cmath import log
-import imp
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpRequest
 from django.http import JsonResponse
 from .models import *
 from django.template.context_processors import csrf
@@ -92,8 +88,12 @@ def isFriend(userName, friendName):
 def addFriend(request):
     userName = request.user.username
     friendName = request.GET.get('friendName')
+
     if not friendName or isFriend(userName, friendName):
         return JsonResponse({'status': 'error'})
+    if not User.objects.filter(username=friendName).exists():
+        return JsonResponse({'status': 'error'})
+
     Friends(userName=userName, friendName=friendName.lower()).save()
     Friends(userName=friendName.lower(), friendName=userName).save()
     return JsonResponse({'status': 'success'})
