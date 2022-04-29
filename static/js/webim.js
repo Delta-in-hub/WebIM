@@ -119,6 +119,25 @@ function isBase64Image(str) {
   return base64regex.test(str);
 }
 
+function getMessagesLength(friendName) {
+  var url = "/apis/getMessagesLength?friendName=";
+  if (friendName == null || friendName == "") {
+    return 0;
+  }
+  url += friendName;
+  var http = new XMLHttpRequest();
+  http.open("GET", url, false);
+  http.send(null);
+  if (http.readyState == 4 && http.status == 200) {
+    try {
+      return JSON.parse(http.responseText)["length"];
+    } catch (e) {
+      return 0;
+    }
+  }
+  return 0;
+}
+
 function changeChatArea(afriend) {
   // console.log("changeChatArea: " + afriend.innerHTML);
   if (afriend == null) {
@@ -135,16 +154,18 @@ function changeChatArea(afriend) {
     afriend.getElementsByClassName("msg-username")[0].innerHTML;
 
   var chatAreaMain = document.getElementsByClassName("chat-area-main")[0]; // chat-area-main
+  if (
+    chatAreaMain.getElementsByClassName("chat-msg-text").length ==
+    getMessagesLength(
+      afriend.getElementsByClassName("msg-username")[0].innerHTML
+    )
+  ) {
+    return;
+  }
 
   messageList = getOrderedMessageList(
     afriend.getElementsByClassName("msg-username")[0].innerHTML
   );
-  if (
-    messageList.length ==
-    chatAreaMain.getElementsByClassName("chat-msg-text").length
-  ) {
-    return;
-  }
 
   chatAreaMain.innerHTML = "";
   var pre_chat = null;
@@ -262,14 +283,20 @@ function getAvatar(friendName) {
 }
 
 function getLastMessage(friendNmae) {
-  var messageList = getMessagesSendByFriend(friendNmae);
-  if (messageList.length == 0) {
-    return ["", ""];
+  url = "apis/getLastMessageSendByFriend?friendName=" + friendNmae;
+  var http = new XMLHttpRequest();
+  http.open("GET", url, false);
+  http.send(null);
+  if (http.readyState == 4 && http.status == 200) {
+    try {
+      var response = JSON.parse(http.responseText)["messages"][0];
+      return [response["content"].substring(0, 20), response["time"]];
+    } catch (e) {
+      return ["", ""];
+    }
   }
-  return [
-    messageList[messageList.length - 1]["content"].substring(0, 15),
-    messageList[messageList.length - 1]["time"],
-  ];
+
+  return ["", ""];
 }
 
 function updateFriendList(friendsList) {

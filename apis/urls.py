@@ -10,4 +10,6 @@ urlpatterns = [
     path("removeFriend", removeFriend),
     path("getUserInfo", getUserInfo),
     path("getCsrfToken", getCsrfToken),
+    path("getLastMessageSendByFriend", getLastMessageSendByFriend),
+    path("getMessagesLength", getMessagesLength),
 ]

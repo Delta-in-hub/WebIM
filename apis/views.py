@@ -52,11 +52,48 @@ def getMessagesSendByFriend(request):
 
 
 @login_required(login_url='/user/login/')
+def getLastMessageSendByFriend(request):
+    userName = request.user.username
+    friendName = request.GET.get('friendName')
+    if not friendName:
+        return JsonResponse({'status': 'error'})
+
+    if not isFriend(userName, friendName):
+        return JsonResponse({'status': 'error'})
+
+    messages = Message.objects.filter(
+        sender=friendName.lower(), receiver=userName)
+    if not messages or messages.count() == 0:
+        return JsonResponse({'user': userName, 'friendName': friendName, 'messages': []})
+    else:
+        message = messages[len(messages) - 1]
+        return JsonResponse({'user': userName, 'friendName': friendName, 'messages': [{"content": message.content, "time": message.time}]})
+
+
+@login_required(login_url='/user/login/')
+def getMessagesLength(request):
+    userName = request.user.username
+    friendName = request.GET.get('friendName')
+    if not friendName:
+        return JsonResponse({'status': 'error'})
+
+    if not isFriend(userName, friendName):
+        return JsonResponse({'status': 'error'})
+    messageLength = 0
+    messageLength += len(Message.objects.filter(
+        sender=friendName.lower(), receiver=userName))
+    messageLength += len(Message.objects.filter(
+        sender=userName, receiver=friendName.lower()))
+
+    return JsonResponse({'user': userName, 'friendName': friendName, 'length': messageLength})
+
+
+@ login_required(login_url='/user/login/')
 def getCsrfToken(request):
     return JsonResponse({'csrfToken': str(csrf(request)['csrf_token'])})
 
 
-@login_required(login_url='/user/login/')
+@ login_required(login_url='/user/login/')
 def sendMessage(request):
     if(request.method != 'POST'):
         return JsonResponse({'status': 'error', "message": "method not allowed"})
@@ -84,7 +121,7 @@ def isFriend(userName, friendName):
             return False
 
 
-@login_required(login_url='/user/login/')
+@ login_required(login_url='/user/login/')
 def addFriend(request):
     userName = request.user.username
     friendName = request.GET.get('friendName')
@@ -99,7 +136,7 @@ def addFriend(request):
     return JsonResponse({'status': 'success'})
 
 
-@login_required(login_url='/user/login/')
+@ login_required(login_url='/user/login/')
 def removeFriend(request):
     userName = request.user.username
     friendName = request.GET.get('friendName')
@@ -112,7 +149,7 @@ def removeFriend(request):
     return JsonResponse({'status': 'success'})
 
 
-@login_required(login_url='/user/login/')
+@ login_required(login_url='/user/login/')
 def getUserInfo(request):
     userName = request.user.username
     return JsonResponse({'userName': userName})
