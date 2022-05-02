@@ -277,6 +277,7 @@ const hashCode = (s) =>
 
 function getAvatar(friendName) {
   var hash = hashCode(friendName);
+  hash = Math.abs(hash);
   var avatar = hash % 22; //1-22
   avatar = avatar + 1;
   return "/static/emoji/emoji" + avatar + ".png";
