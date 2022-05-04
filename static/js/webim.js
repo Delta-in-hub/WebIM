@@ -528,6 +528,7 @@ $("#image-choose").change(function () {
 function getCsrfToken() {
   var cookies = document.cookie.split(";");
   for (var i = 0; i < cookies.length; i++) {
+    cookies[i] = cookies[i].split(" ").join("");
     if (cookies[i].startsWith("csrftoken=")) {
       return cookies[i].substring("csrftoken=".length, cookies[i].length);
     }
