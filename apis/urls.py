@@ -14,7 +14,7 @@ urlpatterns = [
     path("getMessagesLength", getMessagesLength),
     path("getLastMessageSendByFriend", getLastMessageSendByFriend),
 
-    # 其他模块
+    # 辅助模块
     path("getUserInfo", getUserInfo),
     path("getCsrfToken", getCsrfToken),
 ]
