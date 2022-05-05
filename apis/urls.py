@@ -2,14 +2,19 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    # 好友管理模块
+    path("addFriend", addFriend),
     path("getFriendsList", getFriendsList),
+    path("removeFriend", removeFriend),
+
+    # 消息管理模块
     path("getMessagesSendByMe", getMessagesSendByMe),
     path("getMessagesSendByFriend", getMessagesSendByFriend),
     path("sendMessage", sendMessage),
-    path("addFriend", addFriend),
-    path("removeFriend", removeFriend),
+    path("getMessagesLength", getMessagesLength),
+    path("getLastMessageSendByFriend", getLastMessageSendByFriend),
+
+    # 其他模块
     path("getUserInfo", getUserInfo),
     path("getCsrfToken", getCsrfToken),
-    path("getLastMessageSendByFriend", getLastMessageSendByFriend),
-    path("getMessagesLength", getMessagesLength),
 ]
