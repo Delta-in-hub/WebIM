@@ -35,7 +35,11 @@
   });
 
   function validate(input) {
-    if ($(input).attr("type") == "email" || $(input).attr("name") == "email") {
+    if (
+      $(input).attr("type") == "email" ||
+      $(input).attr("name") == "email" ||
+      $(input).attr("type") == "password"
+    ) {
       if ($(input).val().trim() == "") {
         return false;
       }
