@@ -130,6 +130,8 @@ def addFriend(request):
         return JsonResponse({'status': 'error'})
     if not User.objects.filter(username=friendName).exists():
         return JsonResponse({'status': 'error'})
+    if userName.lower() == friendName.lower():
+        return JsonResponse({'status': 'error'})
 
     Friends(userName=userName, friendName=friendName.lower()).save()
     Friends(userName=friendName.lower(), friendName=userName).save()
