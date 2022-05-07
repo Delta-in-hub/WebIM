@@ -12,8 +12,7 @@
 
 > 画图[processon](https://www.processon.com/)
 
-1. 需求分析...(chen)
-
+1. 需求分析...
 2. 引言
    1. 引言
    2. 系统功能设计
